@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import AOS from "aos";
 import {
   FiGrid,
   FiBox,
@@ -13,7 +14,6 @@ import {
   FiSettings,
   FiLogOut,
   FiChevronLeft,
-
   FiRepeat,
   FiTrendingUp,
   FiTrendingDown,
@@ -21,17 +21,6 @@ import {
   FiActivity,
 } from "react-icons/fi";
 import { NavLink } from "react-router-dom";
-
-// const menuItems = [
-//   { name: "Dashboard", icon: FiGrid, path: "/" },
-//   { name: "Products", icon: FiBox, path: "/products" },
-//   { name: "Store", icon: FiShoppingBag, path: "/store" },
-//   { name: "Messages", icon: FiMessageSquare, path: "/messages" },
-//   { name: "Statistics", icon: FiBarChart2, path: "/statistics" },
-//   { name: "Invoices", icon: FiFileText, path: "/invoices" },
-//   { name: "To Do List", icon: FiCalendar, path: "/todo" },
-//   { name: "Finances", icon: FiDollarSign, path: "/finances" },
-// ];
 
 const menuItems = [
   { name: "Dashboard", icon: FiGrid, path: "/" },
@@ -59,6 +48,14 @@ const Sidebar = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+  if (isOpen) {
+    setTimeout(() => {
+      AOS.refresh();
+    }, 300); // wait for slide animation
+  }
+}, [isOpen]);
 
   return (
     <>
@@ -117,7 +114,11 @@ const Sidebar = () => {
               <NavLink
                 key={index}
                 to={item.path}
-                onClick={() => setIsOpen(false)} // ✅ auto close on mobile
+                onClick={() => setIsOpen(false)}
+                data-aos="zoom-in"
+                data-aos-delay={index * 100}
+                data-aos-duration="600"
+                data-aos-once="true"
                 className={({ isActive }) =>
                   `flex items-center ${
                     collapsed ? "justify-center" : "gap-3"
@@ -136,33 +137,35 @@ const Sidebar = () => {
 
           {/* Support */}
           <div className="mt-8  border-t border-t-gray-700">
+            <p className="text-gray-400 text-xs mt-6 mb-2 px-3">
+              {!collapsed && "HELP & SUPPORT"}
+            </p>
 
-          
-          <p className="text-gray-400 text-xs mt-6 mb-2 px-3">
-            {!collapsed && "HELP & SUPPORT"}
-          </p>
+            <NavLink
+              to="/help"
+              onClick={() => setIsOpen(false)}
+              data-aos="zoom-in"
+              data-aos-delay={(menuItems.length + 1) * 100}
+              className={`flex items-center ${
+                collapsed ? "justify-center" : "gap-3"
+              } px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-800`}
+            >
+              <FiHelpCircle size={20} />
+              {!collapsed && <span>Help Center</span>}
+            </NavLink>
 
-          <NavLink
-            to="/help"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center ${
-              collapsed ? "justify-center" : "gap-3"
-            } px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-800`}
-          >
-            <FiHelpCircle size={20} />
-            {!collapsed && <span>Help Center</span>}
-          </NavLink>
-
-          <NavLink
-            to="/settings"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center ${
-              collapsed ? "justify-center" : "gap-3"
-            } px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-800`}
-          >
-            <FiSettings size={20} />
-            {!collapsed && <span>Settings</span>}
-          </NavLink>
+            <NavLink
+              to="/settings"
+              onClick={() => setIsOpen(false)}
+              data-aos="zoom-in"
+              data-aos-delay={(menuItems.length + 1) * 100}
+              className={`flex items-center ${
+                collapsed ? "justify-center" : "gap-3"
+              } px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-800`}
+            >
+              <FiSettings size={20} />
+              {!collapsed && <span>Settings</span>}
+            </NavLink>
           </div>
         </div>
 
