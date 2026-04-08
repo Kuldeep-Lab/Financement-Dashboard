@@ -10,11 +10,25 @@ import Budgets from "./Pages/Budgets";
 import Setting from "./Pages/Setting";
 import Help from "./Pages/Help";
 
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
+
 const Page = ({ title }) => (
   <div className="p-6 text-xl font-semibold">{title}</div>
 );
 
 function App() {
+
+    useEffect(() => {
+    AOS.init({
+      duration: 1000,   // animation duration (ms)
+      once: true,       // animation runs only once
+      easing: "ease-in-out",
+      offset: 80,      // trigger offset
+    });
+  }, []);
+
   return (
     <Router>
       <div className="flex h-screen">
