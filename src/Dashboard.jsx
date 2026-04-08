@@ -1,6 +1,7 @@
 import { FiMenu, FiBell, FiUser } from "react-icons/fi";
 import { FiSearch, FiMessageSquare, FiChevronDown } from "react-icons/fi";
 import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import {
   PieChart,
   Pie,
@@ -29,25 +30,61 @@ const dataLine = [
   { name: "Dec", value: 4000 },
 ];
 
-const Card = ({ title, value, change }) => (
-  <div className="bg-white rounded-xl  shadow-md  p-4 flex flex-col gap-2">
-    <span className="text-gray-500 text-sm">{title}</span>
-    <h2 className="text-xl font-semibold">{value}</h2>
-    <span
-      className={`text-sm ${
-        change.includes("-") ? "text-red-500" : "text-green-500"
-      }`}
+
+const Card = ({ title, value, change, aos, delay }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const end = Number(value);
+    if (start === end) return;
+
+    const duration = 1000; // animation duration (ms)
+    const incrementTime = 16; // ~60fps
+    const step = end / (duration / incrementTime);
+
+    const counter = setInterval(() => {
+      start += step;
+
+      if (start >= end) {
+        setDisplayValue(end);
+        clearInterval(counter);
+      } else {
+        setDisplayValue(Math.floor(start));
+      }
+    }, incrementTime);
+
+    return () => clearInterval(counter);
+  }, [value]);
+
+  return (
+    <div
+      data-aos={aos}
+      data-aos-delay={delay}
+      className="bg-white rounded-xl shadow-md border border-gray-200 p-4 flex flex-col gap-2"
     >
-      {change} since last week
-    </span>
-  </div>
-);
+      <span className="text-gray-500 text-sm">{title}</span>
+
+      {/* 👇 animated value */}
+      <h2 className="text-xl font-semibold">
+        ₹{displayValue.toLocaleString()}
+      </h2>
+
+      <span
+        className={`text-sm ${
+          change.includes("-") ? "text-red-500" : "text-green-500"
+        }`}
+      >
+        {change} since last week
+      </span>
+    </div>
+  );
+};
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  
   const [editData, setEditData] = useState({});
 
   // navbar code
@@ -113,7 +150,7 @@ export default function Dashboard() {
       date: "",
       category: "",
       amount: "",
-      type: "expense"
+      type: "expense",
     });
 
     setShowForm(false);
@@ -210,7 +247,6 @@ export default function Dashboard() {
         <div className="flex items-center gap-6">
           {/* Divider */}
           <div className="h-6 w-px bg-gray-300" />
-          
 
           {/* Icons */}
           <FiMessageSquare
@@ -265,17 +301,44 @@ export default function Dashboard() {
 
       <div className="p-3 md:p-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card title="Total Balance" value={`₹${balance}`} change="+6.5%" />
-          <Card title="Total Income" value={`₹${income}`} change="+2%" />
-          <Card title="Total Expenses" value={`₹${expense}`} change="-1%" />
-          <Card title="Savings" value={`₹${balance * 0.2}`} change="+3%" />
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-6">
+          <Card
+            title="Total Balance"
+            value={balance}
+            change="+6.5%"
+            aos="zoom-in"
+          />
+          <Card
+            title="Total Income"
+            value={income}
+            change="+2%"
+            aos="zoom-in"
+            delay={150}
+          />
+          <Card
+            title="Total Expenses"
+            value={expense}
+            change="-1%"
+            aos="zoom-in"
+            delay={300}
+          />
+          <Card
+            title="Savings"
+            value={balance * 0.2}
+            change="+3%"
+            aos="zoom-in"
+            delay={500}
+          />
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-10 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-16 mb-6">
           {/* Donut Chart */}
-          <div className="bg-white p-4 rounded-xl shadow-md flex flex-col">
+          <div
+            data-aos="zoom-in"
+              data-aos-delay="200"
+            className="bg-white p-4 rounded-xl shadow-md border border-gray-200 flex flex-col"
+          >
             {/* Heading */}
             <h1 className="text-xl font-semibold mb-4">Spending Breakdown</h1>
 
@@ -321,25 +384,35 @@ export default function Dashboard() {
           </div>
 
           {/* Line Chart */}
-          <div className="bg-white p-4 rounded-xl shadow-md flex flex-col">
-            <h1 className=" font-semibold mb-4 text-xl">Balance Trends</h1>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-white p-4 rounded-xl border border-gray-200 shadow-md flex flex-col"
+          >
+            <h1 className="font-semibold mb-4 text-xl">Balance Trends</h1>
 
-            <div className="w-full h-52">
-              <ResponsiveContainer>
+            <div className="w-full h-55">
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dataLine}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <Tooltip />
+
+                  {/* 🔥 animated line */}
                   <Line
                     type="monotone"
                     dataKey="value"
                     stroke="#6366F1"
                     strokeWidth={2}
+                    isAnimationActive={true}
+                    animationDuration={800}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Insights Section */}
@@ -386,7 +459,7 @@ export default function Dashboard() {
                   onClick={() => setShowForm(true)}
                   className="bg-blue-600 text-white px-4 text-sm md:text-lg py-2 rounded-lg"
                 >
-                   Add Transaction
+                  Add Transaction
                 </button>
               </div>
             )}
@@ -447,8 +520,8 @@ export default function Dashboard() {
                     </div>
 
                     <div className="font-medium">
-                    <span className="text-gray-500">Amount: </span>
-                    ₹ {t.amount}
+                      <span className="text-gray-500">Amount: </span>₹{" "}
+                      {t.amount}
                     </div>
                   </div>
 
